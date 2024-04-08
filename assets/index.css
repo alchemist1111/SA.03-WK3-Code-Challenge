@@ -27,6 +27,7 @@ body {
 #subtitle {
   color: white;
   margin-left: 55px;
+  cursor: pointer;
 }
 
 #showing {
@@ -35,6 +36,7 @@ body {
 
 #films li::before {
   content: "";
+  cursor: pointer;
 }
 
 .film {
