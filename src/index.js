@@ -1,110 +1,104 @@
 document.addEventListener('DOMContentLoaded', function () {
   // Function to fetch film data from the server
   function fetchFilmData() {
-    fetch('http://localhost:3000/films')
-      .then(response => response.json())
+    fetch('http://localhost:5000/films')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch film data');
+        }
+        return response.json();
+      })
       .then(data => {
-        // Call a function to render the film list on the left side of the page
         renderFilmList(data);
-        // Display details of the first film by default
         if (data.length > 0) {
-          displayFilmDetails(data[0].id);
+          displayFilmDetails(data[0]);
         }
       })
-      .catch(error => console.error('Error fetching film data:', error));
-  };
+      .catch(error => console.error('Error fetching film data:', error.message));
+  }
 
   // Function to render film list on the left side of the page
   function renderFilmList(films) {
     const filmsListElement = document.getElementById('films');
-
     filmsListElement.innerHTML = ''; // Clear existing list
+
     films.forEach(film => {
       const li = document.createElement('li');
       li.classList.add('film', 'item');
       li.textContent = film.title;
-
-      // Add click event listener to each film item
-      li.addEventListener('click', () => {
-        displayFilmDetails(film.id);
-        fetch(`http://localhost:3000/films/${film.id}`)
-          .then(response => response.json())
-          .then(data => {
-            const posterElement = document.getElementById('poster');
-            posterElement.src = data.poster;
-          })
-          .catch(error => console.error('Error fetching film details:', error));
-      });
-      filmsListElement.appendChild(li)
+      li.addEventListener('click', () => displayFilmDetails(film));
+      filmsListElement.appendChild(li);
     });
-  };
+  }
 
   // Function to display film details on the right side of the page
-  function displayFilmDetails(filmId) {
-    fetch(`http://localhost:3000/films/${filmId}`)
-      .then(response => response.json())
-      .then(data => {
-        const titleElement = document.getElementById('title');
-        const runtimeElement = document.getElementById('runtime');
-        const filmInfoElement = document.getElementById('film-info');
-        const showtimeElement = document.getElementById('showtime');
-        const ticketNumElement = document.getElementById('ticket-num');
-        const buyTicketButton = document.getElementById('buy-ticket');
+  function displayFilmDetails(film) {
+    const {
+      id,
+      title,
+      runtime,
+      description,
+      showtime,
+      tickets_sold,
+      capacity,
+      poster
+    } = film;
 
-        // Update film details
-        titleElement.textContent = data.title;
-        runtimeElement.textContent = `${data.runtime} minutes`;
-        filmInfoElement.textContent = data.description;
-        showtimeElement.textContent = data.showtime;
-        const availableTickets = data.capacity - data.tickets_sold;
-        ticketNumElement.textContent = `${availableTickets} remaining tickets`;
+    const titleElement = document.getElementById('title');
+    const runtimeElement = document.getElementById('runtime');
+    const filmInfoElement = document.getElementById('film-info');
+    const showtimeElement = document.getElementById('showtime');
+    const ticketNumElement = document.getElementById('ticket-num');
+    const buyTicketButton = document.getElementById('buy-ticket');
+    const posterElement = document.getElementById('poster');
 
-        // Update Buy Ticket button
-        if (availableTickets > 0) {
-          buyTicketButton.textContent = 'Buy Ticket';
-          buyTicketButton.disabled = false;
-        } else {
-          buyTicketButton.textContent = 'Sold Out';
-          buyTicketButton.disabled = true;
-        }
+    titleElement.textContent = title;
+    runtimeElement.textContent = `${runtime} minutes`;
+    filmInfoElement.textContent = description;
+    showtimeElement.textContent = showtime;
 
-        // Add event listener to Buy Ticket button
-        buyTicketButton.onclick = () => handleBuyTicket(filmId, availableTickets, data);
-      })
-      .catch(error => console.error('Error fetching film details:', error));
-  };
+    const availableTickets = capacity - tickets_sold;
+    ticketNumElement.textContent = `${availableTickets} remaining tickets`;
+
+    buyTicketButton.textContent = availableTickets > 0 ? 'Buy Ticket' : 'Sold Out';
+    buyTicketButton.disabled = availableTickets <= 0;
+
+    buyTicketButton.onclick = () => handleBuyTicket(id, tickets_sold, capacity);
+    posterElement.src = poster;
+  }
 
   // Function to handle buying a ticket
-  function handleBuyTicket(filmId, availableTickets, data) {
-    if (availableTickets > 0) {
-      const updatedTicketsSold = data.tickets_sold + 1;
-      updateTicketsSoldOnServer(filmId, updatedTicketsSold, data);
-
-      // Update ticket count on the frontend
-      const ticketNumElement = document.getElementById('ticket-num');
-      ticketNumElement.textContent = `${availableTickets - 1} remaining tickets`;
+  function handleBuyTicket(filmId, ticketsSold, capacity) {
+    event.preventDefault();
+    const updatedTicketsSold = ticketsSold + 1;
+    if (updatedTicketsSold <= capacity) {
+      updateTicketsSoldOnServer(filmId, updatedTicketsSold)
+        .then(() => {
+          fetchFilmData(); // Refresh film data to update ticket count
+        })
+        .catch(error => console.error('Error updating tickets sold on server:', error.message));
+    } else {
+      console.error('Cannot buy more tickets than the capacity allows');
     }
   };
+  
 
   // Function to update tickets sold on the server
-  function updateTicketsSoldOnServer(filmId, updatedTicketsSold, data) {
-    fetch(`http://localhost:3000/films/${filmId}`, {
+  async function updateTicketsSoldOnServer(filmId, updatedTicketsSold) {
+    const response = await fetch(`http://localhost:5000/films/${filmId}`, {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json',
-        'accept': 'application/json'
-        },
-        body: JSON.stringify({
-          tickets_sold: updatedTicketsSold
-        })
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        tickets_sold: updatedTicketsSold
       })
-      .then(response => response.json())
-      .then(data => console.log('Updated tickets sold on server:', data))
-      .catch(error => console.error('Error updating tickets sold on server:', error));
-    };
-    
-     
-  
-    // Fetch film data when the page loads
-    fetchFilmData();
-  });
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update tickets sold on server');
+    }
+  }
+
+  // Fetch film data when the page loads
+  fetchFilmData();
+});
