@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   // Function to fetch film data from the server
   function fetchFilmData() {
-    fetch('http://localhost:3000/films')
+    fetch('https://render.com/docs/web-services#port-binding')
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch film data');
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Function to update tickets sold on the server
   async function updateTicketsSoldOnServer(filmId, updatedTicketsSold) {
-    const response = await fetch(`http://localhost:3000/films/${filmId}`, {
+    const response = await fetch(`https://render.com/docs/web-services#port-binding/${filmId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'
