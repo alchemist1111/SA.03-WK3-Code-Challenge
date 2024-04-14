@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Function to handle buying a ticket
   function handleBuyTicket(filmId, ticketsSold, capacity) {
-    event.preventDefault();
+    e.preventDefault();
     const updatedTicketsSold = ticketsSold + 1;
     if (updatedTicketsSold <= capacity) {
       updateTicketsSoldOnServer(filmId, updatedTicketsSold)
@@ -85,10 +85,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Function to update tickets sold on the server
   async function updateTicketsSoldOnServer(filmId, updatedTicketsSold) {
-    const response = await fetch(`https://json-server-avvr.onrender.com/${filmId}`, {
+    const response = await fetch(`https://json-server-avvr.onrender.com/films/${filmId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'
+        `accept: application/json`
       },
       body: JSON.stringify({
         tickets_sold: updatedTicketsSold
