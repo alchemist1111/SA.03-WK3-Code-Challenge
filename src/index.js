@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   // Function to fetch film data from the server
   function fetchFilmData() {
-    fetch('http://localhost:5000/films')
+    fetch('http://localhost:3000/films')
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch film data');
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Function to update tickets sold on the server
   async function updateTicketsSoldOnServer(filmId, updatedTicketsSold) {
-    const response = await fetch(`http://localhost:5000/films/${filmId}`, {
+    const response = await fetch(`http://localhost:3000/films/${filmId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'
@@ -102,3 +102,4 @@ document.addEventListener('DOMContentLoaded', function () {
   // Fetch film data when the page loads
   fetchFilmData();
 });
+
