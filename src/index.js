@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Function to display film details on the right side of the page
+  // Function to display film details on the right side of the page.
   function displayFilmDetails(film) {
     const {
       id,
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (updatedTicketsSold <= capacity) {
       updateTicketsSoldOnServer(filmId, updatedTicketsSold)
         .then(() => {
-          fetchFilmData(); // Refresh film data to update ticket count
+          fetchFilmData(); // Refresh film data to update ticket count.
         })
         .catch(error => console.error('Error updating tickets sold on server:', error.message));
     } else {
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
   };
   
 
-  // Function to update tickets sold on the server
+  // Function to update tickets sold on the server.
   async function updateTicketsSoldOnServer(filmId, updatedTicketsSold) {
     const response = await fetch(`https://json-server-avvr.onrender.com/films/${filmId}`, {
       method: 'PATCH',
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Fetch film data when the page loads
+  // Fetch film data when the page loads.
   fetchFilmData();
 });
 
